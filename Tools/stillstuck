@@ -1,0 +1,163 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "import sys\n",
+    "sys.path.append(r'C:\\Program Files (x86)\\ArcGIS\\Desktop10.3\\bin')\n",
+    "sys.path.append(r'C:\\Program Files (x86)\\ArcGIS\\Desktop10.3\\arcpy')\n",
+    "sys.path.append(r'C:\\Program Files (x86)\\ArcGIS\\Desktop10.3\\ArcToolbox\\Scripts')\n",
+    "\n",
+    "# Because Workspace\n",
+    "import arcpy     \n",
+    "import os\n",
+    "arcpy.env.workspace=\"F:\\\\UW\\\\GEOG458 Python\\\\Lab 2_ToolsService\\\\workspace\\\\\"  "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Flexable code that allows for reclassification, according to flex critearia (names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "# Nested Cursor Paramaters\n",
+    "arcpy.env.workspace = \"F:\\\\UW\\\\GEOG458 Python\\\\Lab 2_ToolsService\\\\workspace\"\n",
+    "outputfolder = \"F:\\\\UW\\\\GEOG458 Python\\\\Lab 2_ToolsService\\\\workspace\\\\output\\\\\"\n",
+    "infile = \"F:\\\\UW\\\\GEOG458 Python\\\\Lab 2_ToolsService\\\\workspace\\\\King.shp\"\n",
+    "popdens = \"PopDens12\"\n",
+    "mytable = \"F:\\\\UW\\\\GEOG458 Python\\\\Lab 2_ToolsService\\\\workspace\\\\ReclassTableExample.dbf\"\n",
+    "lower = \"lowerbound\"\n",
+    "upper = \"upperbound\"\n",
+    "value = \"value\"\n",
+    "output = \"F:\\\\UW\\\\GEOG458 Python\\\\Lab 2_ToolsService\\\\workspace\\\\output\\\\oncemore.shp\"\n",
+    "outvalue = \"ranking\"\n",
+    "novalue = \"42\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<Result 'F:\\\\UW\\\\GEOG458 Python\\\\Lab 2_ToolsService\\\\workspace\\\\output\\\\oncemore.shp'>"
+      ]
+     },
+     "execution_count": 28,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Copy shapefiles \n",
+    "arcpy.CopyFeatures_management (infile, output)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<Result 'F:\\\\UW\\\\GEOG458 Python\\\\Lab 2_ToolsService\\\\workspace\\\\output\\\\oncemore.shp'>"
+      ]
+     },
+     "execution_count": 29,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Add a field\n",
+    "arcpy.AddField_management (output, outvalue, \"INTEGER\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Executing: AddField \"F:\\UW\\GEOG458 Python\\Lab 2_ToolsService\\workspace\\output\\oncemore.shp\" ranking INTEGER # # # # NULLABLE NON_REQUIRED #\n",
+      "Start Time: Mon Feb 08 13:13:00 2016\n",
+      "Adding ranking to F:\\UW\\GEOG458 Python\\Lab 2_ToolsService\\workspace\\output\\oncemore.shp...\n",
+      "Succeeded at Mon Feb 08 13:13:00 2016 (Elapsed Time: 0.57 seconds)\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Working with nested cursors\n",
+    "cursor1 = arcpy.da.UpdateCursor(output, [popdens, outvalue]) \n",
+    "cursor2 = arcpy.da.UpdateCursor(mytable, [upper, lower, value])\n",
+    "for row1 in Cursor1:\n",
+    "    for row2 in Cursor2:\n",
+    "        if row1[0] <= row2[0] and row1[0] >= row2[1]:\n",
+    "            row1[1] = row2[2]\n",
+    "            cursor1.updateRow(row1)\n",
+    "            cursor2.updateRow(row2)\n",
+    "        else:\n",
+    "            out_name = novalue\n",
+    "            cursor1.updateRow(row1)\n",
+    "            cursor2.updateRow(row2)\n",
+    "print arcpy.GetMessages() "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}
